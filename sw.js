@@ -1,6 +1,6 @@
 // Field Tools service worker. Keeps the app's own files so it opens with no signal.
 // Tracks aren't kept here: the app saves them in IndexedDB. Bump VERSION when files change.
-const VERSION = "2026-10-24b";
+const VERSION = "2026-10-24c";
 const CACHE = "field-tools-" + VERSION;
 const FILES = ["./", "index.html", "app.js", "styles.css", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon.png"];
 

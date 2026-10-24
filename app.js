@@ -373,7 +373,7 @@
         try {
             const res = await fetch(SITE + "/_functions/fieldTracks?k=" + encodeURIComponent(KEY), { cache: "no-store", credentials: "omit" });
             const data = await res.json().catch(() => ({}));
-            if (res.status === 403) { app.status = "This install link was replaced. Ask for the new link on the Stage (📲 Offline app). Saved tracks still play."; app.bad = true; }
+            if (res.status === 403) { app.status = "This install link was replaced. Ask for the new link on the Podium (📲 Offline app). Saved tracks still play."; app.bad = true; }
             else if (!res.ok || !Array.isArray(data.tracks)) throw new Error("HTTP " + res.status);
             else {
                 app.tracks = data.tracks; app.listAt = Date.now();
@@ -421,7 +421,7 @@
 
     // ---------------------------------------------------------------- drawing
     function setupHtml() {
-        return `<div class="setup"><b style="color:#fff">Connect your show tracks</b><br>Paste the link from the Stage (Field tools → 📲 Offline app → Copy link).
+        return `<div class="setup"><b style="color:#fff">Connect your show tracks</b><br>Paste the link from the Podium (Field tools → 📲 Offline app → Copy link).
             <input data-setup placeholder="Paste the link here" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="go small" data-act="setup">Connect</button></div>`;
     }
     function tracksHtml() {
@@ -467,7 +467,10 @@
         const tabs = [["tracks", "🎵 Tracks"], ["metronome", "🥁 Metronome"], ["tuner", "🎚️ Tuner"], ["stopwatch", "⏲️ Stopwatch"]];
         const live = { tracks: !!(app.player.audio && !app.player.audio.paused), metronome: app.metro.on, tuner: app.tuner.on, stopwatch: app.sw.running };
         const body = app.tab === "metronome" ? metroHtml() : app.tab === "tuner" ? tunerHtml() : app.tab === "stopwatch" ? swHtml() : tracksHtml();
-        root.innerHTML = `<header><span class="logo" aria-hidden="true">🎺</span><b>Field Tools</b>${navigator.onLine === false ? `<span class="off">No signal</span>` : ""}</header>
+        const sun = store.get("sun", true);
+        document.body.classList.toggle("sun", sun);
+        const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", sun ? "#ffffff" : "#16141b");
+        root.innerHTML = `<header><span class="logo" aria-hidden="true">🎺</span><b>Field Tools</b>${navigator.onLine === false ? `<span class="off">No signal</span>` : ""}<button class="sunbtn" data-act="sun" aria-label="${sun ? "Switch to dark colors (indoors)" : "Switch to bright-sun colors (outside)"}">${sun ? "🌙 Dark" : "☀️ Sun"}</button></header>
             ${installHtml()}
             <nav>${tabs.map(([k, l]) => `<button data-tab="${k}" class="${k === app.tab ? "on" : ""} ${live[k] && k !== app.tab ? "live" : ""}">${l}</button>`).join("")}</nav>
             <main>${body}</main>
@@ -490,9 +493,10 @@
         if (d.act === "refresh") { refreshList(); return; }
         if (d.act === "setup") {
             const k = keyFrom((root.querySelector("[data-setup]") || {}).value);
-            if (!k) { app.status = "That doesn't look like the Field Tools link. Copy it again on the Stage."; app.bad = true; render(); return; }
+            if (!k) { app.status = "That doesn't look like the Field Tools link. Copy it again on the Podium."; app.bad = true; render(); return; }
             KEY = k; store.set("key", k); refreshList(); return;
         }
+        if (d.act === "sun") { store.set("sun", !store.get("sun", true)); render(); return; }
         if (d.act === "hideInstall") { store.set("hideInstall", true); render(); return; }
         if (d.act === "install" && app.installEvt) { app.installEvt.prompt(); app.installEvt = null; render(); return; }
         if (d.mt) {
